@@ -1,0 +1,18 @@
+Create the user and group if they don't already exist:
+Bash
+
+groupadd -g 1000 mediauser
+useradd -u 1000 -g 1000 -s /bin/bash -m mediauser
+
+(If groupadd or useradd report that the group/user already exists, that's fine. Just proceed.)
+
+Change ownership of /data:
+Bash
+
+chown -R mediauser:mediauser /data
+
+Set directory permissions:
+This allows the mediauser to read/write. 775 is generally good for this type of shared media storage.
+Bash
+
+chmod -R 775 /data

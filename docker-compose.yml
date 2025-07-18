@@ -1,5 +1,7 @@
-version: "3.2"
+version: "3.8"
 services:
+  # Radarr is a movie collection manager for Usenet and BitTorrent users.
+  # It automates the downloading, sorting, and renaming of movie files.
   radarr:
     container_name: radarr
     image: ghcr.io/hotio/radarr:latest
@@ -11,12 +13,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Zurich
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/radarr:/config
-      - /data:/data
+      - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
+      - /docker/appdata/radarr:/config # Container's configuration files and database
+      - /data:/data # Main media library and download folders
   sonarr:
+    # Sonarr is a TV show collection manager for Usenet and BitTorrent users.
+    # It automates the downloading, sorting, and renaming of TV show episodes.
     container_name: sonarr
     image: ghcr.io/hotio/sonarr:latest
     restart: unless-stopped
@@ -27,12 +31,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Zurich
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/sonarr:/config
-      - /data:/data
+      - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
+      - /docker/appdata/sonarr:/config # Container's configuration files and database
+      - /data:/data # Main media library and download folders
   bazarr:
+    # Bazarr is a companion application to Radarr and Sonarr.
+    # It manages and downloads subtitles for your movies and TV shows.
     container_name: bazarr
     image: ghcr.io/hotio/bazarr:latest
     restart: unless-stopped
@@ -43,12 +49,14 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Zurich
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/bazarr:/config
-      - /data/media:/data/media
+      - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
+      - /docker/appdata/bazarr:/config # Container's configuration files and database
+      - /data/media:/data/media # Media library for subtitle scanning
   sabnzbd:
+    # SABnzbd is an automated Usenet download client.
+    # It downloads, verifies, repairs, and extracts files from Usenet.
     container_name: sabnzbd
     image: ghcr.io/hotio/sabnzbd:latest
     restart: unless-stopped
@@ -60,8 +68,8 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
-      - TZ=Europe/Amsterdam
+      - TZ=Europe/Zurich
     volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /docker/appdata/sabnzbd:/config
-      - /data/usenet:/data/usenet:rw
+      - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
+      - /docker/appdata/sabnzbd:/config # Container's configuration files and database
+      - /data/usenet:/data/usenet:rw # Download directory for Usenet files

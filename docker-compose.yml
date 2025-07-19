@@ -93,4 +93,69 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./config/prowl
+      - ./config/prowlarr:/config # Container's configuration files and database, now relative to docker-compose.yml
+
+  # Overseerr is a media request management and discovery tool.
+  # It integrates with Radarr, Sonarr, and Plex/Jellyfin.
+  overseerr:
+    container_name: overseerr
+    image: sctx/overseerr:latest # Corrected image name from sct/overseerr
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 5055:5055 # Overseerr web UI
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/overseerr:/config # Container's configuration files and database, now relative to docker-compose.yml
+
+  # File Browser provides a web interface to browse and manage files on your server.
+  filebrowser:
+    container_name: filebrowser
+    image: filebrowser/filebrowser:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 8081:80 # File Browser web UI (using 8081 to avoid conflict with SABnzbd's 8080)
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/filebrowser:/config # File Browser configuration and database, now relative to docker-compose.yml
+      - /data:/srv # Mount your main data volume for browsing
+
+  # Jellyfin is a Free Software Media System for streaming your media.
+  # It will scan your media folders and serve content to various client devices.
+  jellyfin:
+    container_name: jellyfin
+    image: ghcr.io/hotio/jellyfin:latest # Changed to Hotio image
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 8096:8096 # Jellyfin web UI and streaming
+      - 8920:8920/tcp # For DLNA (optional, but common)
+      - 7359:7359/udp # For GDM (optional, for discovery)
+      - 1900:1900/udp # For DLNA (optional, for discovery)
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+      # Optional: Set this if you're using a reverse proxy with a custom domain/subdomain
+      # - JELLYFIN_PublishedServerUrl=https://jellyfin.yourdomain.com
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/jellyfin:/config # Jellyfin configuration and database, now relative to docker-compose.yml
+      - /data/media:/data/media # Mount only the /data/media subfolder for Jellyfin
+      # Optional: If you have a GPU in your Proxmox host and have passed it through to the LXC,
+      # uncomment the 'devices' section below for hardware transcoding.
+      # Ensure the device path is correct for your setup (e.g., /dev/dri for Intel iGPU).
+    # devices:
+    #   - /dev/dri:/dev/dri

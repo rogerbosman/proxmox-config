@@ -95,24 +95,24 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - ./config/prowlarr:/config # Container's configuration files and database, now relative to docker-compose.yml
 
-  # Overseerr is a media request management and discovery tool.
-  # It integrates with Radarr, Sonarr, and Plex/Jellyfin.
-  overseerr:
-    container_name: overseerr
-    image: sctx/overseerr:latest # Corrected image name from sct/overseerr
+  # Jellyseerr is an open-source media request and discovery manager for Jellyfin, Plex, and Emby.
+  # It is a fork of Overseerr with stronger native Jellyfin integration.
+  jellyseerr:
+    container_name: jellyseerr # Changed container name for clarity
+    image: fallenbagel/jellyseerr:latest # Changed image to Jellyseerr
     restart: unless-stopped
     logging:
       driver: json-file
     ports:
-      - 5055:5055 # Overseerr web UI
+      - 5055:5055 # Jellyseerr web UI (default port is often 5055, same as Overseerr)
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./config/overseerr:/app/config # Corrected internal mount path for Overseerr
-      # The external path ./config/overseerr maps to /app/config inside the container.
+      - ./config/jellyseerr:/app/config # Jellyseerr's config path is also /app/config
+      # The external path ./config/jellyseerr maps to /app/config inside the container.
 
   # File Browser provides a web interface to browse and manage files on your server.
   filebrowser:

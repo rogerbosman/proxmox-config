@@ -111,7 +111,8 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./config/overseerr:/config # Container's configuration files and database, now relative to docker-compose.yml
+      - ./config/overseerr:/app/config # Corrected internal mount path for Overseerr
+      # The external path ./config/overseerr maps to /app/config inside the container.
 
   # File Browser provides a web interface to browse and manage files on your server.
   filebrowser:

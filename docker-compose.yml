@@ -94,26 +94,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/prowlarr:/config # Container's configuration files and database, now relative to docker-compose.yml
-
-  # Lidarr is a music collection manager for Usenet and BitTorrent users.
-  # It automates the downloading, sorting, and renaming of music files.
-  lidarr:
-    container_name: lidarr
-    image: ghcr.io/hotio/lidarr:latest
-    restart: unless-stopped
-    logging:
-      driver: json-file
-    ports:
-      - 8686:8686 # Lidarr web UI
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Zurich
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - ./config/lidarr:/config # Container's configuration files and database, now relative to docker-compose.yml
-      - /data:/data # Main music library and download folders
-
+      
   # Overseerr is a media request management and discovery tool.
   # It integrates with Radarr, Sonarr, and Plex/Jellyfin.
   overseerr:

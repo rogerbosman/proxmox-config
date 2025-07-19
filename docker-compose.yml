@@ -16,11 +16,12 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
-      - /docker/appdata/radarr:/config # Container's configuration files and database
+      - ./config/radarr:/config # Container's configuration files and database, now relative to docker-compose.yml
       - /data:/data # Main media library and download folders
+
+  # Sonarr is a TV show collection manager for Usenet and BitTorrent users.
+  # It automates the downloading, sorting, and renaming of TV show episodes.
   sonarr:
-    # Sonarr is a TV show collection manager for Usenet and BitTorrent users.
-    # It automates the downloading, sorting, and renaming of TV show episodes.
     container_name: sonarr
     image: ghcr.io/hotio/sonarr:latest
     restart: unless-stopped
@@ -34,11 +35,12 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
-      - /docker/appdata/sonarr:/config # Container's configuration files and database
+      - ./config/sonarr:/config # Container's configuration files and database, now relative to docker-compose.yml
       - /data:/data # Main media library and download folders
+
+  # Bazarr is a companion application to Radarr and Sonarr.
+  # It manages and downloads subtitles for your movies and TV shows.
   bazarr:
-    # Bazarr is a companion application to Radarr and Sonarr.
-    # It manages and downloads subtitles for your movies and TV shows.
     container_name: bazarr
     image: ghcr.io/hotio/bazarr:latest
     restart: unless-stopped
@@ -52,11 +54,12 @@ services:
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
-      - /docker/appdata/bazarr:/config # Container's configuration files and database
-      - /data/media:/data/media # Media library for subtitle scanning
+      - ./config/bazarr:/config # Container's configuration files and database, now relative to docker-compose.yml
+      - /data/media:/data/media # Media library for subtitle scanning (ensure this matches your final media location)
+
+  # SABnzbd is an automated Usenet download client.
+  # It downloads, verifies, repairs, and extracts files from Usenet.
   sabnzbd:
-    # SABnzbd is an automated Usenet download client.
-    # It downloads, verifies, repairs, and extracts files from Usenet.
     container_name: sabnzbd
     image: ghcr.io/hotio/sabnzbd:latest
     restart: unless-stopped
@@ -64,12 +67,114 @@ services:
       driver: json-file
     ports:
       - 8080:8080
-      - 9090:9090
+      - 9090:9090 # Only expose if needed for external API access
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Zurich
     volumes:
       - /etc/localtime:/etc/localtime:ro # Read-only access to host's timezone info
-      - /docker/appdata/sabnzbd:/config # Container's configuration files and database
-      - /data/usenet:/data/usenet:rw # Download directory for Usenet files
+      - ./config/sabnzbd:/config # Container's configuration files and database, now relative to docker-compose.yml
+      - /data/usenet:/data/usenet # Download directory for Usenet files
+
+  # Prowlarr is an indexer manager/proxy for your *arr apps.
+  # It centralizes management of Usenet indexers and Torrent trackers.
+  prowlarr:
+    container_name: prowlarr
+    image: ghcr.io/hotio/prowlarr:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 9696:9696 # Prowlarr web UI
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/prowlarr:/config # Container's configuration files and database, now relative to docker-compose.yml
+
+  # Lidarr is a music collection manager for Usenet and BitTorrent users.
+  # It automates the downloading, sorting, and renaming of music files.
+  lidarr:
+    container_name: lidarr
+    image: ghcr.io/hotio/lidarr:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 8686:8686 # Lidarr web UI
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/lidarr:/config # Container's configuration files and database, now relative to docker-compose.yml
+      - /data:/data # Main music library and download folders
+
+  # Overseerr is a media request management and discovery tool.
+  # It integrates with Radarr, Sonarr, and Plex/Jellyfin.
+  overseerr:
+    container_name: overseerr
+    image: sct/overseerr:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 5055:5055 # Overseerr web UI
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/overseerr:/config # Container's configuration files and database, now relative to docker-compose.yml
+
+  # File Browser provides a web interface to browse and manage files on your server.
+  filebrowser:
+    container_name: filebrowser
+    image: filebrowser/filebrowser:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 8081:80 # File Browser web UI (using 8081 to avoid conflict with SABnzbd's 8080)
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/filebrowser:/config # File Browser configuration and database, now relative to docker-compose.yml
+      - /data:/srv # Mount your main data volume for browsing
+
+  # Jellyfin is a Free Software Media System for streaming your media.
+  # It will scan your media folders and serve content to various client devices.
+  jellyfin:
+    container_name: jellyfin
+    image: ghcr.io/hotio/jellyfin:latest
+    restart: unless-stopped
+    logging:
+      driver: json-file
+    ports:
+      - 8096:8096 # Jellyfin web UI and streaming
+      - 8920:8920/tcp # For DLNA (optional, but common)
+      - 7359:7359/udp # For GDM (optional, for discovery)
+      - 1900:1900/udp # For DLNA (optional, for discovery)
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Zurich
+      # Optional: Set this if you're using a reverse proxy with a custom domain/subdomain
+      # - JELLYFIN_PublishedServerUrl=https://jellyfin.yourdomain.com
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./config/jellyfin:/config # Jellyfin configuration and database, now relative to docker-compose.yml
+      - /data:/data # Mount your main media library
+      # Optional: If you have a GPU in your Proxmox host and have passed it through to the LXC,
+      # uncomment the 'devices' section below for hardware transcoding.
+      # Ensure the device path is correct for your setup (e.g., /dev/dri for Intel iGPU).
+    # devices:
+    #   - /dev/dri:/dev/dri

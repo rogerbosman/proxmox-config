@@ -153,7 +153,7 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./config/jellyfin:/config # Jellyfin configuration and database, now relative to docker-compose.yml
-      - /data:/data # Mount your main media library
+      - /data/media:/data/media # Mount only the /data/media subfolder for Jellyfin
       # Optional: If you have a GPU in your Proxmox host and have passed it through to the LXC,
       # uncomment the 'devices' section below for hardware transcoding.
       # Ensure the device path is correct for your setup (e.g., /dev/dri for Intel iGPU).
